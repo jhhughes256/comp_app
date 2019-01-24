@@ -1,7 +1,8 @@
 # Storage of inputs for one-for-one reallocation
 # -----------------------------------------------------------------------------
-# One-for-one reallocation requires a reasonably complex input method to
-#  achieve. Here we experiment with how to store information for a heatmap.
+# One-for-remaining reallocation requires a reasonably complex input method to
+#  achieve. Here we experiment with how to store information for a heatmap so
+#  that we can do both one-for-one and one-for-remaining with the same tool
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # Prepare work environment
 # Load libraries
