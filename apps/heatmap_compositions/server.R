@@ -67,16 +67,33 @@
       }
     })  # Rclick
     
+  # Observe input$method to reset the matrix when changed
+    observeEvent(input$method, {
+      r$m[r$m != -1] <- 0
+    }) 
+    
   # Observe Rclick() to update matrix if plot is clicked
   # Dependent on Rclick(); changes r$m
     observeEvent(Rclick(), {
-      if (!is.null(Rclick())) {  # if clicked app start
-      # Check to see whether box clicked on is currently white (0) or red (1)
-        if (r$m[Rclick()$x, Rclick()$y] == 0) {  # if white
-          r$m[Rclick()$x, Rclick()$y] <- 1
-        } else if (r$m[Rclick()$x, Rclick()$y] == 1) {  # if red
-          r$m[Rclick()$x, Rclick()$y] <- 0
-        }
+      if (!is.null(Rclick())) {  # if clicked since app start
+      # Check to see what radioButton is pressed (reallocation method)
+        if (input$method == "One-for-one") {
+          # Check to see whether box clicked on is currently white (0) or red (1)
+          if (r$m[Rclick()$x, Rclick()$y] == 0) {  # if white
+            r$m[r$m != -1] <- 0  # set all spaces to white
+            r$m[Rclick()$x, Rclick()$y] <- 1  # set clicked space to red
+          } else if (r$m[Rclick()$x, Rclick()$y] == 1) {  # if red
+            r$m[Rclick()$x, Rclick()$y] <- 0
+          }  # if.white.red
+        } else if (input$method == "One-for-remaining") {
+          # Check to see whether box clicked on is currently white (0) or red (1)
+          if (r$m[Rclick()$x, Rclick()$y] == 0) {  # if white
+            r$m[r$m != -1] <- 0  # set all spaces to white
+            r$m[Rclick()$x, r$m[Rclick()$x, ] != -1] <- 1  # set clicked column to red
+          } else if (r$m[Rclick()$x, Rclick()$y] == 1) {  # if red
+            r$m[Rclick()$x, r$m[Rclick()$x, ] != -1] <- 0
+          }  # if.white.red
+        }  # if.input$method
       }  # if.Rclick()
     })  # observeEvent.Rclick
     
