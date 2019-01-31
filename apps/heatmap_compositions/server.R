@@ -106,14 +106,15 @@
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Observe r$update to detect whether UI should be rendered
   # Dependent on r$update and r$rc; renderUI isolated unless r$update == 1
+  # Checks to see if 
     observe({
       if (r$update == 1) {
         output$slidersUI <- renderUI({
           fluidRow(
-            reactiveSlider("Sleep", "Sleep", r$rc),
-            reactiveSlider("Sed", "SB", r$rc),
-            reactiveSlider("Light", "LPA", r$rc),
-            reactiveSlider("MVPA", "MVPA", r$rc)
+            if (any(r$m[1,] == 1)) { reactiveSlider("Sleep", "Sleep", r$rc) },
+            if (any(r$m[2,] == 1)) { reactiveSlider("Sed", "SB", r$rc) },
+            if (any(r$m[3,] == 1)) { reactiveSlider("Light", "LPA", r$rc) },
+            if (any(r$m[4,] == 1)) { reactiveSlider("MVPA", "MVPA", r$rc) }
           )
         })
         r$update <- 0
