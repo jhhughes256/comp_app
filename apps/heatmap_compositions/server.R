@@ -133,7 +133,10 @@
     
   # Output r$rv ### DEBUG ###
     output$info2 <- renderPrint({
-      r$rc
+      list(
+        Relative.Change = r$rc, 
+        New.Composition = Rcomp()
+      )
     })  # output$info2
     
   # Reallocation of compositional data
