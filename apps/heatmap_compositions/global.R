@@ -2,8 +2,8 @@
 # -----------------------------------------------------------------------------
 # Non-reactive objects/expressions
 # Load package libraries
-  library(ggplot2)
-  library(compositions)
+  require(ggplot2)
+  require(compositions)
 
 # Source models
   source("model/model.R")

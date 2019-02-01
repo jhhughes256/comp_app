@@ -12,8 +12,8 @@ fluidPage(
     height = 250, width = 300
   ),  # plotOutput
   hr(),
-  verbatimTextOutput("info1"),
+  # verbatimTextOutput("info1"),  # debug
   uiOutput("slidersUI"),
-  verbatimTextOutput("info2"),
+  d3Output("d3", width = "600px", height = "300px"),
   align = "center"
 )

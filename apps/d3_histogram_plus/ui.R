@@ -2,6 +2,7 @@
 # -----------------------------------------------------------------------------
 # User Interface Expressions
   fluidPage(
+    h3("Compare what it's like to have different amounts of cats!"),
     inputPanel(
       sliderInput("barcol1", label = "Column 1:",
         min = 0.1, max = 10, value = 2, step = 0.1

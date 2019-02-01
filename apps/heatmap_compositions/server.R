@@ -97,10 +97,10 @@
       }  # if.Rclick()
     })  # observeEvent.Rclick
     
-  # Output r$m ### DEBUG ###
-    output$info1 <- renderPrint({
-      t(r$m[, 4:1])
-    })  # output$info1
+  # # Output r$m ### DEBUG ###
+  #   output$info1 <- renderPrint({
+  #     t(r$m[, 4:1])
+  #   })  # output$info1
     
   # Reactive Sliders
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -149,19 +149,11 @@
       }
     })  # observeEvent(input$MVPA)
     
-  # Output r$rv ### DEBUG ###
-    output$info2 <- renderPrint({
-      list(
-        Relative.Change = r$rc, 
-        New.Composition = Rcomp()
-      )
-    })  # output$info2
-    
   # Reallocation of compositional data
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  Rcomp <- reactive({
-    reallocation(m.comp, r$rv, 1440, t(r$m[,4:1]))
-  })
+    Rcomp <- reactive({
+      reallocation(m.comp, r$rv, 1440, t(r$m[,4:1]))
+    })
     
   # Observe r$rv to detect when reactiveSliders have user input
     observeEvent(r$rv, {
@@ -170,5 +162,23 @@
         r$update <- 1
       }
     })
+    
+  # Display new composition
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Create reactive object to send to d3 script
+    d3data <- reactive({
+      data.frame(
+        comp = Rcomp()*2,
+        val = round(Rcomp()*24, 1)
+      )
+    })  # d3data
+    
+  # Call d3 script
+    output$d3 <- renderD3({
+      r2d3(
+        d3data(),
+        script = "script.js"  # and here we call the script
+      )  # r2d3
+    })  # renderD3
     
   })  # shinyServer
