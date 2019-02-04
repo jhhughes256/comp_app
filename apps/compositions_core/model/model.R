@@ -34,6 +34,7 @@
 
 # To make predictions we need a reference composition - use mean composition
   m.comp <- as.vector(mean(act.comp))
+  names(m.comp) <- c("Sleep", "SB", "LPA", "MVPA")
   
 # 
 #   

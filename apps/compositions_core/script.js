@@ -41,9 +41,9 @@ htext.enter()
   .append("text")
   .text(function(d) { return d.val + d.unit; })
   .attr("x", function(d, i) { return (i * barWidth + (i + 1) * barWidth) / 2; })
-  .attr("y", function(d) { return barBase - d.prop * barHeight - 16; })
+  .attr("y", function(d) { return barBase - d.prop * barHeight - 13; })
   .attr("text-anchor", "middle")
-  .attr("font-size", "20px")
+  .attr("font-size", "16px")
   .attr("font-weight", "700")
   .attr("fill", "black");
   
@@ -53,7 +53,7 @@ htext.enter()
   .attr("x", function(d, i) { return (i * barWidth + (i + 1) * barWidth) / 2; })
   .attr("y", height - 5)
   .attr("text-anchor", "middle")
-  .attr("font-size", "20px")
+  .attr("font-size", "16px")
   .attr("font-weight", "700")
   .attr("fill", "black");
 
@@ -66,5 +66,5 @@ hist.transition()
 htext.transition()
   .duration(500)
   .text(function(d) { return d.val + d.unit; })
-  .attr("y", function(d) {return barBase - d.prop * barHeight - 16});
+  .attr("y", function(d) {return barBase - d.prop * barHeight - 13});
   

@@ -14,8 +14,8 @@
         0, -1, 0, 0, 
         -1, 0, 0, 0
       ), ncol = 4),
-    # composition residual
-      rc = c("Sleep" = 0, "SB" = 0, "LPA" = 0, "MVPA" = 0),
+    # saved reactive composition
+      rc = m.comp,
     # reallocation vector
       rv = c("Sleep" = 0, "SB" = 0, "LPA" = 0, "MVPA" = 0),
     # I/O switch for re-rendering of reactiveSliders
@@ -26,18 +26,18 @@
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Create heatmap data
   # Dependent on r$m
-    Rdata <- reactive({
+    Rgrid <- reactive({
       data <- expand.grid(activity, rev(activity))
       names(data) <- c("a1", "a2")
       data$v <- factor(as.vector(r$m))
       levels(data$v) <- c(0, 2, 1)
       return(data)
-    })  # Rdata
+    })  # Rgrid
     
   # Plot the heatmap matrix
-  # Dependent on Rdata()
+  # Dependent on Rgrid()
     output$plot <- renderPlot({
-      ggplot(data = Rdata(), aes(x = a1, y = a2, fill = v)) + 
+      ggplot(data = Rgrid(), aes(x = a1, y = a2, fill = v)) + 
       geom_tile(colour = "black") + 
       scale_fill_manual(values = c("grey", "white", "red")) + 
       scale_x_discrete("Swap\n", position = "top") + 
@@ -68,8 +68,10 @@
     })  # Rclick
     
   # Observe input$method to reset the matrix when changed
+  # Also update the reactive composition
     observeEvent(input$method, {
       r$m[r$m != -1] <- 0
+      r$update <- 1
     }) 
     
   # Observe Rclick() to update matrix if plot is clicked
@@ -94,6 +96,8 @@
             r$m[Rclick()$x, r$m[Rclick()$x, ] != -1] <- 0
           }  # if.white.red
         }  # if.input$method
+      # Finally update the reactive composition
+        r$update <- 1
       }  # if.Rclick()
     })  # observeEvent.Rclick
     
@@ -102,21 +106,30 @@
   #     t(r$m[, 4:1])
   #   })  # output$info1
     
-  # Reactive Sliders
+  # Reallocation of Compositional Data
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Observe r$update to detect whether UI should be rendered
   # Dependent on r$update and r$rc; renderUI isolated unless r$update == 1
-  # Checks to see if 
+  # Checks to see if either reset button is pressed as well, this invalidates
+  #   the expression and causes the reactiveSlider to be remade without updating
+  #   the saved reactive composition. It also resets the values for r$rv and/or
+  #   r$rc
     observe({
-      if (r$update == 1) {
-        output$slidersUI <- renderUI({
-          fluidRow(
-            if (any(r$m == 1)) { reactiveSlider(r$m, r$rc) }
-          )
-        })
-        r$update <- 0
-      }
+      output$slidersUI <- renderUI({
+        fluidRow(
+          if (any(r$m == 1)) { reactiveSlider(r$m) }
+        )
+      })
+      input$resetAll
+      input$resetSliders
     })
+    
+  # Debounce slider inputs so that they don't invalidate the server until they
+  #   have ceased movement.
+    debounce.Sleep <- debounce(reactive(input$Sleep), debounceSettings)
+    debounce.SB <- debounce(reactive(input$SB), debounceSettings)
+    debounce.LPA <- debounce(reactive(input$LPA), debounceSettings)
+    debounce.MVPA <- debounce(reactive(input$MVPA), debounceSettings)
     
   # Observe inputs to detect when user has made an input
   # Dependent on user input using output$sliderUI; changes r$rv
@@ -124,46 +137,63 @@
   #   whether any boxes have been ticked in the heatmap
     observeEvent(input$Sleep, {
       if(input$Sleep != round(r$rc["Sleep"]) & any(r$m[1,] == 1)) {  
-        r$rv["Sleep"] <- input$Sleep + (r$rv["Sleep"] - r$rc["Sleep"])*(input$Sleep)^0
+        r$rv <- reallocation(r$rc, c(input$Sleep, 0, 0, 0), t(r$m[, 4:1]))
       }
     })  # observeEvent(input$Sleep)
     
     observeEvent(input$SB, {
       if(input$SB != round(r$rc["SB"]) & any(r$m[2,] == 1)) {
-        r$rv["SB"] <- input$SB + (r$rv["SB"] - r$rc["SB"])*(input$SB)^0
+        r$rv <- reallocation(r$rc, c(0, input$SB, 0, 0), t(r$m[, 4:1]))
       }
     })  # observeEvent(input$SB)
     
     observeEvent(input$LPA, {
       if(input$LPA != round(r$rc["LPA"]) & any(r$m[3,] == 1)) {
-        r$rv["LPA"] <- input$LPA + (r$rv["LPA"] - r$rc["LPA"])*(input$LPA)^0
+        r$rv <- reallocation(r$rc, c(0, 0, input$LPA, 0), t(r$m[, 4:1]))
       }
     })  # observeEvent(input$LPA)
     
     observeEvent(input$MVPA, {
       if(input$MVPA != round(r$rc["MVPA"]) & any(r$m[4,] == 1)) {
-        r$rv["MVPA"] <- input$MVPA + (r$rv["MVPA"] - r$rc["MVPA"])*(input$MVPA)^0
+        r$rv <- reallocation(r$rc, c(0, 0, 0, input$MVPA), t(r$m[, 4:1]))
       }
     })  # observeEvent(input$MVPA)
     
-  # Reallocation of compositional data
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Define a reactive composition which will be called upon by the reactive
+  #   parts of the server, such as the d3 histogram.
     Rcomp <- reactive({
-      reallocation(m.comp, r$rv, 1440, t(r$m[,4:1]))
+      r$rc + r$rv
     })
     
-  # Observe r$rv to detect when reactiveSliders have user input
-    observeEvent(r$rv, {
-      if (all.equal(Rcomp(), m.comp) != T) {
-        isolate(r$rc[1:length(r$rc)] <- (Rcomp() - m.comp)*1440)
-        r$update <- 1
-      }
+  # When user changes the method or clicks on the heatmap, r$update is set to
+  #   one. This adds the reallocation vector to the reactive composition and
+  #   resets the reallocation vector for the next slider.
+    observeEvent(r$update == 1, {
+      r$rc <- r$rc + r$rv
+      r$rv[1:length(r$rv)] <- 0
+      r$update <- 0
+    })
+    
+  # Observe for when the user presses the reset buttons and set values to
+  #   their original state accordingly.
+    observeEvent(input$resetSliders, {
+      r$rv[1:length(r$rv)] <- 0
+    })
+      
+    observeEvent(input$resetAll, {
+      r$rv[1:length(r$rv)] <- 0
+      r$rc <- m.comp
     })
     
   # Display new composition on histogram
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Create reactive object to send to d3 script
     d3data <- reactive({
+    # Recalculate the dataset for the d3 histogram if user clicks the reset
+    #   buttons.
+      input$resetAll
+      input$resetSliders
+      
     # If less than an hour show in minutes
       rounded.comp <- round(Rcomp()*24, 1)
       comp.units <- rep(" hours", length(rounded.comp))
@@ -195,11 +225,11 @@
     })
 
   # Open console for R session
-    observe(label = "console", {
-      if(input$console != 0) {
-        options(browserNLdisabled = TRUE)
-        isolate(browser())
-      }
-    })
+    # observe(label = "console", {
+    #   if(input$console != 0) {
+    #     options(browserNLdisabled = TRUE)
+    #     isolate(browser())
+    #   }
+    # })
     
   })  # shinyServer

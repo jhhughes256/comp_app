@@ -1,9 +1,11 @@
 # Server for Interactive Heatmap used with Compositions
 # -----------------------------------------------------------------------------
 # Non-reactive objects/expressions
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # Load package libraries
   require(ggplot2)
   require(compositions)
+  require(r2d3)
 
 # Source models
   source("model/model.R")
@@ -13,6 +15,7 @@
   nact <- length(activity)
   
 # Define functions
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # Function used for heatmaps to ensure that user clicks stay within the plot
   inGrid <- function(coord, axis, n) {
     out <- coord
@@ -25,19 +28,19 @@
   }
   
 # Function used to make reactiveSliders when used in app server
-  reactiveSlider <- function(rm, rv, labs = activity) {
+  reactiveSlider <- function(rm, labs = activity) {
     trm <- t(rm[, 4:1])
     act.col <- which(apply(trm, 2, function(x) { any(x == 1) }))
     act.swap <- labs[act.col]
     act.for <- paste(labs[trm[, act.col] == 1], collapse = ", ")
     sliderInput(act.swap, paste("Swap", act.swap, "for", act.for),
       min = -120, max = 120, ticks = FALSE, 
-      value = rv[act.swap]
+      value = 0
     )
   }
   
 # Function that automates reallocation for compositions
-  reallocation <- function(comp, reall, total, hm) {
+  reallocation <- function(comp, reall, hm, total = 1440) {
     # Remove negative ones from heatmap matrix
     diag(hm) <- 0
     
@@ -57,16 +60,18 @@
     # Create matrices for r and s values, then convert to proportional values
     rs <- t(apply(hm, 1, function(x) { x*s }))
     if(any(rs != 0)) { diag(rs) <- r }
-    prop <- 1 + rs
+    prop <- rs
     
-    # Multiply compositions by proportional values
-    new.comp <- comp
+    # Determine change in composition
+    delta.comp <- rep(0, length(comp))
     for(i in 1:dim(hm)[1]) {
-      new.comp <- new.comp*prop[,i]
+      delta.comp <- delta.comp + comp*prop[,i]
     }
-    new.comp
+    delta.comp
   }
   
+# Define options
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # Define heatmap theme
   heatmap.theme <- theme(
     panel.grid.major = element_blank(), 
@@ -74,3 +79,6 @@
     axis.title.y = element_text(angle = 0),
     legend.position = "none"
   )
+  
+# Define debounce settings
+  debounceSettings <- 500
