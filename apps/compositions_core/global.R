@@ -70,6 +70,12 @@
     delta.comp
   }
   
+# Error Message
+# Negative composition error
+  neg.act.error <- paste0(
+    "cannot be performed for less than zero hours. Sliders have been reset."
+  )
+  
 # Define options
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # Define heatmap theme

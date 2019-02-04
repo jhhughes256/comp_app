@@ -19,7 +19,9 @@
     # reallocation vector
       rv = c("Sleep" = 0, "SB" = 0, "LPA" = 0, "MVPA" = 0),
     # I/O switch for re-rendering of reactiveSliders
-      update = 1
+      update = 1,
+    # Error state
+      negerr = 0
     )  # r
     
   # Heatmap interactive-plot widget
@@ -122,6 +124,7 @@
       })
       input$resetAll
       input$resetSliders
+      r$negerr
     })
     
   # Debounce slider inputs so that they don't invalidate the server until they
@@ -165,6 +168,19 @@
       r$rc + r$rv
     })
     
+  # Check to see if Rcomp is ever negative. If so display an error message and
+  #   reset the sliders.
+    observe(
+      if (any(Rcomp() < 0)) {
+        neg.act <- activity[which(Rcomp() < 0)]
+        r$rv[1:length(r$rv)] <- 0
+        showNotification(paste(neg.act, neg.act.error),
+          closeButton = FALSE, type = "error"
+        )  # errorNotification
+        r$negerr <- r$negerr + 1
+      }
+    )
+
   # When user changes the method or clicks on the heatmap, r$update is set to
   #   one. This adds the reallocation vector to the reactive composition and
   #   resets the reallocation vector for the next slider.
@@ -172,18 +188,18 @@
       r$rc <- r$rc + r$rv
       r$rv[1:length(r$rv)] <- 0
       r$update <- 0
-    })
+    })  #observeEvent(Rclick()&input$method)
     
   # Observe for when the user presses the reset buttons and set values to
   #   their original state accordingly.
     observeEvent(input$resetSliders, {
       r$rv[1:length(r$rv)] <- 0
-    })
+    })  #observeEvent(input$resetSliders)
       
     observeEvent(input$resetAll, {
       r$rv[1:length(r$rv)] <- 0
       r$rc <- m.comp
-    })
+    })  #observeEvent(input$resetAll)
     
   # Display new composition on histogram
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
