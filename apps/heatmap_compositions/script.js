@@ -15,8 +15,8 @@ var htext = r2d3.svg.selectAll("text")
 hist.enter()
   .append("rect")
   .attr("x", function(d, i) { return i * barWidth; })
-  .attr("y", function(d) { return height - d.comp * height * heightScale; }) 
-  .attr("height", function(d) { return d.comp * height; })
+  .attr("y", function(d) { return height - d.prop * height * heightScale; }) 
+  .attr("height", function(d) { return d.prop * height; })
   .attr("width", barWidth - barPadding)
   .attr("fill", "steelblue")
 // Turn brown on mouseover
@@ -35,9 +35,9 @@ hist.exit().remove();
 // Define text attributes
 htext.enter()
   .append("text")
-  .text(function(d) { return d.val + " hours"; })
+  .text(function(d) { return d.val + d.unit; })
   .attr("x", function(d, i) { return (i * barWidth + (i + 1) * barWidth) / 2; })
-  .attr("y", function(d) { return height - d.comp * height * heightScale - 16; })
+  .attr("y", function(d) { return height - d.prop * height * heightScale - 16; })
   .attr("text-anchor", "middle")
   .attr("font-size", "20px")
   .attr("font-weight", "700")
@@ -48,11 +48,11 @@ htext.exit().remove();
 //  Create transitions for histogram and text
 hist.transition()
   .duration(500)
-  .attr("y", function(d) { return height - d.comp * height * heightScale; })
-  .attr("height", function(d) { return d.comp * height; });
+  .attr("y", function(d) { return height - d.prop * height * heightScale; })
+  .attr("height", function(d) { return d.prop * height; });
   
 htext.transition()
   .duration(500)
-  .text(function(d) { return d.val + " hours"; })
-  .attr("y", function(d) {return height - d.comp * height * heightScale - 16});
+  .text(function(d) { return d.val + d.unit; })
+  .attr("y", function(d) {return height - d.prop * height * heightScale - 16});
   

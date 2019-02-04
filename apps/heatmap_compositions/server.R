@@ -133,19 +133,19 @@
     
     observeEvent(input$Sed, {
       if(input$Sed != round(r$rc["Sed"]) & any(r$m[2,] == 1)) {
-        r$rv["Sed"] <- input$Sed + (r$rv["Sed"] - r$rc["Sed"])*(input$Sleep)^0
+        r$rv["Sed"] <- input$Sed + (r$rv["Sed"] - r$rc["Sed"])*(input$Sed)^0
       }
     })  # observeEvent(input$Sed)
     
     observeEvent(input$Light, {
       if(input$Light != round(r$rc["Light"]) & any(r$m[3,] == 1)) {
-        r$rv["Light"] <- input$Light + (r$rv["Light"] - r$rc["Light"])*(input$Sleep)^0
+        r$rv["Light"] <- input$Light + (r$rv["Light"] - r$rc["Light"])*(input$Light)^0
       }
     })  # observeEvent(input$Light)
     
     observeEvent(input$MVPA, {
       if(input$MVPA != round(r$rc["MVPA"]) & any(r$m[4,] == 1)) {
-        r$rv["MVPA"] <- input$MVPA + (r$rv["MVPA"] - r$rc["MVPA"])*(input$Sleep)^0
+        r$rv["MVPA"] <- input$MVPA + (r$rv["MVPA"] - r$rc["MVPA"])*(input$MVPA)^0
       }
     })  # observeEvent(input$MVPA)
     
@@ -163,22 +163,45 @@
       }
     })
     
-  # Display new composition
+  # Display new composition on histogram
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Create reactive object to send to d3 script
     d3data <- reactive({
+    # If less than an hour show in minutes
+      rounded.comp <- round(Rcomp()*24, 1)
+      comp.units <- rep(" hours", length(rounded.comp))
+      comp.units[rounded.comp < 1] <- " mins"
+      rounded.comp[rounded.comp < 1] <- round(Rcomp()*1440)[rounded.comp < 1]
+      
+    # Output dataframe for d3 script
       data.frame(
-        comp = Rcomp()*2,
-        val = round(Rcomp()*24, 1)
+        prop = Rcomp()*2,  # affects maximal size of histogram columns
+        val = rounded.comp,  # rounded composition values
+        unit = comp.units  # composition units
       )
     })  # d3data
     
-  # Call d3 script
-    output$d3 <- renderD3({
+  # Call d3 script to make histogram
+    output$d3hist <- renderD3({
       r2d3(
         d3data(),
         script = "script.js"  # and here we call the script
       )  # r2d3
     })  # renderD3
+    
+  # Define session behaviour
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Close the R session when Chrome closes
+  session$onSessionEnded(function() {
+    stopApp()
+  })
+
+  # Open console for R session
+  observe(label = "console", {
+    if(input$console != 0) {
+      options(browserNLdisabled = TRUE)
+      isolate(browser())
+    }
+  })
     
   })  # shinyServer
