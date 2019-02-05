@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # Basic fluidPage UI with title, alignment centre
 fluidPage(align = "center",
-  h2("Heatmap Buttons"),
+  h2("Compositions Core"),
   br(),
     
 # Radio buttons for choosing which reallocation method is selected
