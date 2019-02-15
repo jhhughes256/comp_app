@@ -17,8 +17,8 @@ fluidPage(align = "center",
   ),  # plotOutput
   hr(),
 # Debug UI
-  # actionButton("console","Debug Console"),
-  # verbatimTextOutput("info1"),
+  actionButton("console","Debug Console"),
+  verbatimTextOutput("info1"),
   
 # Histogram output based on the reactive composition
 # Incorporates changes made with the heatmap and the sliders

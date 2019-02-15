@@ -35,3 +35,20 @@
 # Predictive Regression Models
   model.fit <- lm(var.fit ~ ilr.comp + cov.sex + cov.age + cov.ses)
   model.bmi <- lm(var.bmi ~ ilr.comp + cov.age + cov.sex)
+
+# Calculate mean fitness and mean bmi
+  mean.fit <- predict(model.fit, 
+    newdata = list(
+      ilr.comp = ilr(m.comp), 
+      cov.sex = "1", 
+      cov.age = mean(cov.age), 
+      cov.ses = mean(cov.ses)
+    )
+  )
+  mean.bmi <- predict(model.bmi, 
+    newdata = list(
+      ilr.comp = ilr(m.comp), 
+      cov.sex = "1", 
+      cov.age = mean(cov.age)
+    )
+  )

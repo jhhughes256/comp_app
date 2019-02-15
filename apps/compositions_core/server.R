@@ -233,6 +233,27 @@
       )  # r2d3
     })  # renderD3
     
+  # Show percent change in model output
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # This would be dependent on what is selected in the final app
+  # Should create an app that can deal with choosing between multiple models
+  #   and reacting to what the user wants to see.
+    Rmod <- reactive({
+      predict(model.fit, 
+        newdata = list(
+          ilr.comp = ilr(Rcomp()), 
+          cov.sex = "1", 
+          cov.age = mean(cov.age), 
+          cov.ses = mean(cov.ses)
+        )
+      )
+    })
+    
+  # Render model output to interface
+    output$info1 <- renderPrint({
+      paste(round(100*(Rmod() - mean.fit)/mean.fit, 2), "%")
+    })  # output$info1
+    
   # Define session behaviour
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Close the R session when Chrome closes
@@ -241,11 +262,11 @@
     })
 
   # Open console for R session
-    # observe(label = "console", {
-    #   if(input$console != 0) {
-    #     options(browserNLdisabled = TRUE)
-    #     isolate(browser())
-    #   }
-    # })
+    observe(label = "console", {
+      if(input$console != 0) {
+        options(browserNLdisabled = TRUE)
+        isolate(browser())
+      }
+    })
     
   })  # shinyServer
