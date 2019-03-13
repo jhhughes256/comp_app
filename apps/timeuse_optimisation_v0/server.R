@@ -272,7 +272,7 @@
     init.pred <- reactive({
       mod.in <- r$select
       out <- llply(mod.in, function(x) {
-        predict(models[[x]]$mod, 
+        predict(model.list[[x]]$mod, 
           newdata = list(
             ilr.comp = ilr(init.comp()), 
             cov.sex = input$sex, 
@@ -289,7 +289,7 @@
     reall.pred <- reactive({
       mod.in <- r$select
       out <- llply(mod.in, function(x) {
-        predict(models[[x]]$mod, 
+        predict(model.list[[x]]$mod, 
           newdata = list(
             ilr.comp = ilr(Rcomp()), 
             cov.sex = input$sex, 
