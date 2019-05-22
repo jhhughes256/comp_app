@@ -32,16 +32,21 @@ activity.df <- with(raw.data, data.frame(
   cov.age <- raw.data$age
   cov.ses <- raw.data$ses3
   
+  # Define diet vectors
+  diet.unH3 <- raw.data$unH3
+  diet.FV3 <- raw.data$FV3
+  diet.w3sd <- raw.data$w3sugardrinks
+  
   # Predictive Regression Models
-  model.wai <- lm(var.WAI ~ ilr.comp + cov.sex + cov.age + cov.ses)
+  model.wai <- lm(var.WAI ~ ilr.comp + diet.unH3 + diet.FV3 + diet.w3sd + cov.sex + cov.age + cov.ses)
 
-# Calculate mean fitness and mean bmi
-  # Calculate means
-  mean.wai <- predict(model.wai, 
-                      newdata = list(
-                        ilr.comp = ilr(m.comp), 
-                        cov.sex = "1", 
-                        cov.age = mean(cov.age), 
-                        cov.ses = mean(cov.ses)
-                      )
-  )
+# # Calculate mean fitness and mean bmi
+#   # Calculate means
+#   mean.wai <- predict(model.wai, 
+#                       newdata = list(
+#                         ilr.comp = ilr(m.comp), 
+#                         cov.sex = "1", 
+#                         cov.age = mean(cov.age), 
+#                         cov.ses = mean(cov.ses)
+#                       )
+#   )
