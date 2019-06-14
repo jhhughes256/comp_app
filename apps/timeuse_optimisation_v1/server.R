@@ -21,8 +21,13 @@
     })
     
   # Define initial composition
+  # Based on input if it adds up to 24, otherwise based on mean composition
     init.comp <- reactive({
-      acomp(init.time())
+      if (sum(init.time()) == 24) {
+        acomp(init.time())
+      } else {
+        m.comp
+      }
     })
     
   # Define initial diet
@@ -30,15 +35,22 @@
       c("unH" = input$initUnH, "FV" = input$initFV, "w3sd" = input$initSD)
     })
     
+  # Capture reallocated times
+    reall.time <- reactive({
+      c(input$Sleep, input$DomSoc, 
+        input$PA, input$QuietT, 
+        input$School, input$Screen)
+    })
+    
   # Define reactive times
     Rtime <- reactive({
-      reall.time <- c(
-        input$Sleep, input$DomSoc, input$PA, 
-        input$QuietT, input$School, input$Screen
-      )
-      out <- init.time()[1,] + reall.time/60
-      names(out) <- c("Sleep", "DomSoc", "PA", "QuietT", "School", "Screen")
-      return(out)
+      if (sum(reall.time()) == 0) {
+        out <- init.time()[1,] + reall.time()/60
+        names(out) <- c("Sleep", "DomSoc", "PA", "QuietT", "School", "Screen")
+        return(out)
+      } else {
+        init.time()
+      }
     })
     
   # Define reactive composition
@@ -52,6 +64,45 @@
         input$UnH, input$FV, input$SD
       )
       init.diet() - reall.diet
+    })
+    
+  # Define error text that checks whether initial time inputs adds up to 24
+    output$err1 <- renderText({
+      if (sum(init.time()) != 24) {
+        diff <- 24 - sum(init.time())
+        more.less <- ifelse(diff > 0, "add", "remove")
+        hours <- floor(abs(diff))
+        mins <- round((abs(diff) - hours)*60)
+        hours.mins <- paste0(
+          ifelse(hours == 0, "", paste(hours, "hour(s)")),
+          ifelse(hours == 0 | mins == 0, "", " and "),
+          ifelse(mins == 0, "", paste(mins, "minute(s)"))
+        )
+        paste(err1.string, "Please", more.less, hours.mins)
+      } else {
+        " "
+      }
+    })
+    
+  # Define error text that checks whether reallocation time inputs adds up to 0
+    output$err2 <- renderText({
+      if (sum(reall.time()) != 0) {
+        diff <- 0 - sum(reall.time())
+        more.less <- ifelse(diff > 0, "add", "remove")
+        mins <- abs(diff)
+        paste(err2.string, "Please", more.less, mins, "minute(s)")
+      } else {
+        " "
+      }
+    })
+    
+  # Reset all sliders on second tab
+    observeEvent(input$reset_input, {
+      inputs <- c("Sleep", "DomSoc", "PA", "QuietT", "School", "Screen", "FV", "SD", "UnH")
+      for (i in 1:length(inputs)) {
+        id <- inputs[i]
+        session$sendInputMessage(id, list(value = 0))
+      }
     })
     
 # Reactive composition output
@@ -96,9 +147,9 @@
           cov.sex = input$sex, 
           cov.age = input$age, 
           cov.ses = input$ses,
-          diet.FV3 = Rdiet()["FV"],
-          diet.unH3 = Rdiet()["unH"],
-          diet.w3sd = Rdiet()["w3sd"]
+          diet.FV3 = init.diet()["FV"],
+          diet.unH3 = init.diet()["unH"],
+          diet.w3sd = init.diet()["w3sd"]
         )  #list
       )  #predict
       names(out) <- "Wai"
@@ -124,7 +175,7 @@
     
   # Compute difference between initial and reallocated predictions
     delta.pred <- reactive({
-      round(100*(reall.pred() - init.pred())/init.pred(), 2)
+      round(100*(init.pred() - reall.pred())/init.pred(), 2)
     })
     
   # Reallocation results

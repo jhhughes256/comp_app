@@ -109,7 +109,7 @@
     			    ),
     			    column(width = 4,
     			      numericInput("initQuietTmin", "(mins)",
-                  value = 54, step = 1, min = 0, max = 60
+                  value = 24, step = 1, min = 0, max = 60
   			        )  # numericInput.initQuietT.minutes
     			    )
     			  ),  # fluidRow.initQuietT
@@ -138,7 +138,8 @@
                   value = 30, step = 1, min = 0, max = 60
   			        )  # numericInput.initScreen.minutes
     			    )
-    			  )  # fluidRow.initScreen
+    			  ), # fluidRow.initScreen
+    			  div(textOutput("err1"), style = "color: red")
     			), # box.time-input
     			
     			box(title = "Current Dietary Intake Input (serves)", width = 6, status = "primary",
@@ -178,7 +179,8 @@
   		      ), # sliderInput.School
   		      sliderInput("Screen", "Screen-Time", 
   		        value = 0, min = -60, max = 60, ticks = FALSE
-  		      )  # sliderInput.Screen
+  		      ),  # sliderInput.Screen
+    			  div(textOutput("err2"), style = "color: red")
           ), # box.changetime
   		    
   		    box(title = "Allocate New Diet Servings", width = 12,
@@ -202,7 +204,7 @@
   		# Outcomes
   		    box(title = "Outcomes", width = 12, align = "center",
   		      valueBox(textOutput("specific"), "Wai", width = 12),
-  		      submitButton(text = "Submit")
+  		      actionButton("reset_input", "Reset Sliders")
   		    )  # box.outcome
   		  )  # column.right
   		)	# time-tab

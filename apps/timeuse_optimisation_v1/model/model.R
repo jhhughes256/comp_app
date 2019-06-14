@@ -3,16 +3,16 @@
 # Prepare model workspace
 # Load data
   raw.data <- read.csv("model/df_tool.csv")
-names(raw.data)
+  names(raw.data)
 # Make activity data.frame
-activity.df <- with(raw.data, data.frame(
-  Sleep = X6,
-  DomSoc = X1, #includes self care
-  PA = X2,
-  QuietT = X3, #includes passive transport
-  Screen = X5,
-  School = X4
-))
+  activity.df <- with(raw.data, data.frame(
+    Sleep = X6,
+    DomSoc = X1, #includes self care
+    PA = X2,
+    QuietT = X3, #includes passive transport
+    Screen = X5,
+    School = X4
+  ))
   
 # Use acomp() to create Aitchison Composition
   act.comp <- acomp(activity.df)
@@ -40,13 +40,13 @@ activity.df <- with(raw.data, data.frame(
   # Predictive Regression Models
   model.wai <- lm(var.WAI ~ ilr.comp + diet.unH3 + diet.FV3 + diet.w3sd + cov.sex + cov.age + cov.ses)
 
-# # Calculate mean fitness and mean bmi
-#   # Calculate means
-#   mean.wai <- predict(model.wai, 
-#                       newdata = list(
-#                         ilr.comp = ilr(m.comp), 
-#                         cov.sex = "1", 
-#                         cov.age = mean(cov.age), 
-#                         cov.ses = mean(cov.ses)
-#                       )
-#   )
+# Calculate mean fitness and mean bmi
+  # Calculate means
+  # mean.wai <- predict(model.wai,
+  #   newdata = list(
+  #     ilr.comp = ilr(m.comp),
+  #     cov.sex = "1",
+  #     cov.age = mean(cov.age),
+  #     cov.ses = mean(cov.ses)
+  #   )
+  # )
